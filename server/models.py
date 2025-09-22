@@ -1,8 +1,6 @@
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy.orm import validates
 
-
-
 db = SQLAlchemy()
 
 class Restaurant(db.Model):
@@ -12,7 +10,11 @@ class Restaurant(db.Model):
     name = db.Column(db.String)
     address = db.Column(db.String)
 
-    restaurant_pizzas = db.relationship('RestaurantPizza', back_populates='resstaurant', cascade='all, delete-orphan')
+    restaurant_pizzas = db.relationship(
+        'RestaurantPizza', 
+        back_populates='restaurant',
+        cascade='all, delete-orphan'
+    )
 
     def to_dict(self):
         return {
@@ -21,7 +23,6 @@ class Restaurant(db.Model):
             "address": self.address,
             "restaurant_pizzas": [rp.to_dict() for rp in self.restaurant_pizzas]
         }
-    
 
 
 class Pizza(db.Model):
@@ -31,7 +32,11 @@ class Pizza(db.Model):
     name = db.Column(db.String)
     ingredients = db.Column(db.String)
 
-    restaurant_pizzas = db.relationship('Restaurantpizza', back_populates='pizza', cascade='all, delete-orphan')
+    restaurant_pizzas = db.relationship(
+        'RestaurantPizza', 
+        back_populates='pizza', 
+        cascade='all, delete-orphan'
+    )
 
     def to_dict(self):
         return {
@@ -39,7 +44,6 @@ class Pizza(db.Model):
             "name": self.name,
             "ingredients": self.ingredients
         }
-    
 
 
 class RestaurantPizza(db.Model):
@@ -52,8 +56,7 @@ class RestaurantPizza(db.Model):
     restaurant_id = db.Column(db.Integer, db.ForeignKey('restaurants.id'))
 
     pizza = db.relationship('Pizza', back_populates='restaurant_pizzas')
-    restaurant = db.relationship('restaurant', back_populates='restaurant_pizzas')
-
+    restaurant = db.relationship('Restaurant', back_populates='restaurant_pizzas') 
     @validates('price')
     def validate_price(self, key, value):
         if value < 1 or value > 30:
@@ -73,5 +76,3 @@ class RestaurantPizza(db.Model):
                 "address": self.restaurant.address
             }
         }
-    
-
